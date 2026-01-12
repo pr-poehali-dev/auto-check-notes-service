@@ -90,6 +90,20 @@ const Index = () => {
     }
   };
 
+  const handleCameraCapture = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'environment';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        processImage(file);
+      }
+    };
+    input.click();
+  };
+
   const processImage = (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -248,20 +262,30 @@ ${selectedResult.errors.map((err, i) => `${i + 1}. ${err.text} → ${err.suggest
                           Перетащите фото сюда
                         </p>
                         <p className="text-sm text-gray-500 mb-4">или</p>
-                        <label>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileSelect}
-                            className="hidden"
-                          />
-                          <Button variant="outline" className="cursor-pointer" asChild>
-                            <span>
-                              <Icon name="FolderOpen" size={18} className="mr-2" />
-                              Выберите файл
-                            </span>
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                          <Button 
+                            onClick={handleCameraCapture}
+                            variant="default" 
+                            className="cursor-pointer"
+                          >
+                            <Icon name="Camera" size={18} className="mr-2" />
+                            Сделать фото
                           </Button>
-                        </label>
+                          <label>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleFileSelect}
+                              className="hidden"
+                            />
+                            <Button variant="outline" className="cursor-pointer" asChild>
+                              <span>
+                                <Icon name="FolderOpen" size={18} className="mr-2" />
+                                Выбрать файл
+                              </span>
+                            </Button>
+                          </label>
+                        </div>
                       </div>
                     </div>
                   )}
