@@ -7,6 +7,8 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import LoginForm from '@/components/LoginForm';
+import Header from '@/components/Header';
 
 interface CheckResult {
   id: string;
