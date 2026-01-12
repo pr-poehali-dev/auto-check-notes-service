@@ -157,16 +157,16 @@ ${selectedResult.errors.map((err, i) => `${i + 1}. ${err.text} → ${err.suggest
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50">
+      <Header teacherName={teacherName} teacherEmail={teacherEmail} onLogout={handleLogout} />
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <header className="mb-8 text-center animate-fade-in">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Icon name="BookOpen" size={40} className="text-primary" />
-            <h1 className="text-4xl font-bold text-gray-900">ПроверкаТетрадей.РФ</h1>
-          </div>
+        <div className="mb-8 animate-fade-in">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            Добро пожаловать, {teacherName}!
+          </h2>
           <p className="text-lg text-gray-600">
-            Автоматическая проверка письменных работ обучающихся с помощью ИИ
+            Проверьте письменные работы обучающихся с помощью ИИ
           </p>
-        </header>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-6">
