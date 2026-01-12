@@ -27,12 +27,42 @@ interface CheckResult {
 }
 
 const Index = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [teacherName, setTeacherName] = useState('');
+  const [teacherEmail, setTeacherEmail] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [results, setResults] = useState<CheckResult[]>([]);
   const [selectedResult, setSelectedResult] = useState<CheckResult | null>(null);
   const { toast } = useToast();
+
+  const handleLogin = (email: string, name: string) => {
+    setTeacherEmail(email);
+    setTeacherName(name);
+    setIsAuthenticated(true);
+    toast({
+      title: `👋 Добро пожаловать, ${name}!`,
+      description: 'Вы успешно вошли в систему',
+    });
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setTeacherName('');
+    setTeacherEmail('');
+    setResults([]);
+    setSelectedResult(null);
+    setUploadedImage(null);
+    toast({
+      title: '👋 До свидания!',
+      description: 'Вы успешно вышли из системы',
+    });
+  };
+
+  if (!isAuthenticated) {
+    return <LoginForm onLogin={handleLogin} />;
+  }
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
