@@ -1,0 +1,26 @@
+{
+  "tests": [
+    {
+      "name": "Test OCR with valid base64 image",
+      "method": "POST",
+      "body": {
+        "image": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "text": "string"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Test OCR without image",
+      "method": "POST",
+      "body": {},
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

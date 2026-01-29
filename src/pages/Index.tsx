@@ -104,41 +104,43 @@ const Index = () => {
     input.click();
   };
 
-  const processImage = (file: File) => {
+  const processImage = async (file: File) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
-      setUploadedImage(e.target?.result as string);
+    reader.onload = async (e) => {
+      const imageData = e.target?.result as string;
+      setUploadedImage(imageData);
       setIsProcessing(true);
 
-      setTimeout(() => {
+      try {
+        const response = await fetch('https://functions.poehali.dev/aa8c61d3-7afa-4a3a-b4b4-f0d497440f35', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            image: imageData
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Ошибка распознавания текста');
+        }
+
+        const data = await response.json();
+        const recognizedText = data.text || 'Текст не распознан';
+
+        const errors = analyzeText(recognizedText);
+
         const mockResult: CheckResult = {
           id: Date.now().toString(),
           fileName: file.name,
-          studentName: 'Иванов Петр',
-          grade: 4,
-          errorsCount: 3,
+          studentName: extractStudentName(recognizedText),
+          grade: calculateGrade(errors.length),
+          errorsCount: errors.length,
           timestamp: new Date(),
-          recognizedText: 'Наступила осень. Листя пожелтели и опали с деревьев. Птицы улитают на юг.',
-          errors: [
-            {
-              type: 'spelling',
-              text: 'Листя',
-              suggestion: 'Листья',
-              position: 17
-            },
-            {
-              type: 'spelling',
-              text: 'улитают',
-              suggestion: 'улетают',
-              position: 62
-            },
-            {
-              type: 'punctuation',
-              text: 'деревьев',
-              suggestion: 'деревьев,',
-              position: 50
-            }
-          ]
+          recognizedText: recognizedText,
+          errors: errors
         };
 
         setResults(prev => [mockResult, ...prev]);
@@ -149,9 +151,56 @@ const Index = () => {
           title: '✅ Проверка завершена',
           description: `Найдено ошибок: ${mockResult.errorsCount}. Оценка: ${mockResult.grade}`,
         });
-      }, 2000);
+      } catch (error) {
+        setIsProcessing(false);
+        toast({
+          title: '❌ Ошибка',
+          description: error instanceof Error ? error.message : 'Не удалось распознать текст',
+          variant: 'destructive'
+        });
+      }
     };
     reader.readAsDataURL(file);
+  };
+
+  const extractStudentName = (text: string): string => {
+    const lines = text.split('\n');
+    if (lines.length > 0 && lines[0].length < 50) {
+      return lines[0].trim();
+    }
+    return 'Ученик';
+  };
+
+  const calculateGrade = (errorsCount: number): number => {
+    if (errorsCount === 0) return 5;
+    if (errorsCount <= 2) return 4;
+    if (errorsCount <= 4) return 3;
+    return 2;
+  };
+
+  const analyzeText = (text: string) => {
+    const errors: CheckResult['errors'] = [];
+    const commonMistakes = [
+      { wrong: 'жи', correct: 'жи (всегда с И)', regex: /жы/gi },
+      { wrong: 'ши', correct: 'ши (всегда с И)', regex: /шы/gi },
+      { wrong: 'ча', correct: 'ча (всегда с А)', regex: /чя/gi },
+      { wrong: 'ща', correct: 'ща (всегда с А)', regex: /щя/gi },
+      { wrong: 'тся', correct: 'ться', regex: /(\w+)ца(\s|$|[.,!?])/gi },
+    ];
+
+    commonMistakes.forEach(mistake => {
+      let match;
+      while ((match = mistake.regex.exec(text)) !== null) {
+        errors.push({
+          type: 'spelling',
+          text: match[0],
+          suggestion: mistake.correct,
+          position: match.index
+        });
+      }
+    });
+
+    return errors;
   };
 
   const exportResults = () => {
